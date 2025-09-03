@@ -1,0 +1,107 @@
+
+  /* Log-In Page */
+
+@font-face {
+  font-family: Poppins;
+  src: url("../fonts/Poppins-Regular.ttf");
+}
+
+html {
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  height: 100vh;
+  margin: 0;
+  background-color: #f5f5f5;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-panel {
+  background-color: rgba(255, 195, 11, 0.8);
+  border-radius: 15px;
+  padding: 30px; 
+  width: 500px; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.school-logo {
+  display: block;
+  margin: 0 auto 25px auto;
+  width: 130px; 
+  height: 130px; 
+  border-radius: 50%;
+  background-color: white;
+}
+
+.school-title {
+  text-align: center;
+  font-family: "Libre Baskerville", serif;
+  font-size: 22px; 
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 8px; 
+}
+
+.school-subtitle {
+  text-align: center;
+  font-size: 16px;
+  color: #34495e;
+  margin-bottom: 30px;
+}
+
+.form-label {
+  font-size: 14px;
+  color: #2c3e50;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.login-input {
+  width: 100%;
+  padding: 15px 20px; 
+  padding-left: 45px; 
+  border: 1px solid #bdc3c7;
+  border-radius: 5px;
+  font-size: 16px; 
+  margin-bottom: 20px; 
+  background-color: white;
+}
+
+.input-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  top: 43px;
+  color: #7f8c8d;
+  font-size: 20px;
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #5d6d7e;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
+
+.login-button:hover {
+  background-color: #4a5568;
+}
+
+
