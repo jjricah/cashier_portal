@@ -5,7 +5,7 @@ session_start();
 $siteName = "demo.com";
 
 //DEFINE("BASE_URL","http://cipetbhopal.com/");
-DEFINE("BASE_URL","http://localhost/SchoolFeesSystem/");
+DEFINE("BASE_URL","http://localhost/cashier_portal/");
 
 DEFINE ('DB_USER', 'root');
 DEFINE ('DB_PSWD', ''); 
@@ -16,3 +16,4 @@ date_default_timezone_set('Asia/Calcutta');
 $conn =  new mysqli(DB_HOST,DB_USER,DB_PSWD,DB_NAME);
 if($conn->connect_error)
 die("Failed to connect database ".$conn->connect_error );
+

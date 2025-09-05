@@ -116,6 +116,8 @@ include("php/header.php");
                                     <th>#</th>
                                     <th>Name | Contact</th>
                                     <th>Grade</th>
+                                    <th>Section</th>
+                                    <th>Last Semester Taken</th>
                                     <th>Joined On</th>
                                     <th>Fees</th>
                                     <th>Balance</th>
@@ -124,10 +126,14 @@ include("php/header.php");
                             </thead>
                             <tbody>
                                 <?php
-                                $sql = "SELECT student.*, grade.grade as grade_name 
-                                FROM student 
-                                LEFT JOIN grade ON student.grade = grade.id 
-                                WHERE student.delete_status='1'";
+                                $sql = "SELECT student.*, 
+                                        grade.grade as grade_level,
+                                        grade.section,
+                                        grade.semester
+                                    FROM student 
+                                    LEFT JOIN grade ON student.grade = grade.id 
+                                    WHERE student.delete_status='1'
+                                    ORDER BY student.sname ASC";
                                 $q = $conn->query($sql);
                                 $i = 1;
                                 while ($r = $q->fetch_assoc()) {
@@ -135,7 +141,9 @@ include("php/header.php");
                                     echo '<tr ' . (($r['balance'] > 0) ? 'class="primary"' : '') . '>
                                             <td>' . $i . '</td>
                                             <td>' . $r['sname'] . '<br/>' . $r['contact'] . '</td>
-                                            <td>' . $r['grade_name'] . '</td>
+                                            <td>' . $r['grade_level'] . '</td>
+                                            <td>' . $r['section'] . '</td>
+                                            <td>' . $r['semester'] . '</td>
                                             <td>' . date("d M y", strtotime($r['joindate'])) . '</td>
                                             <td>' . $r['fees'] . '</td>
 											<td>' . $r['balance'] . '</td>

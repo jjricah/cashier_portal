@@ -7,49 +7,73 @@ $action = "add";
 $id = "";
 $emailid = '';
 $sname = '';
-$joindate = '';
 $remark = '';
 $contact = '';
 $balance = 0;
 $fees = '';
 $about = '';
 $grade = '';
+$student_id = ''; // New field for student ID number
 
 
 if (isset($_POST['save'])) {
 
 	$sname = mysqli_real_escape_string($conn, $_POST['sname']);
-	$joindate = mysqli_real_escape_string($conn, $_POST['joindate']);
-
 	$contact = mysqli_real_escape_string($conn, $_POST['contact']);
 	$about = mysqli_real_escape_string($conn, $_POST['about']);
 	$emailid = mysqli_real_escape_string($conn, $_POST['emailid']);
 	$grade = mysqli_real_escape_string($conn, $_POST['grade']);
+	$student_id = mysqli_real_escape_string($conn, $_POST['student_id']); // Get student ID
 
-
-	if ($_POST['action'] == "add") {
-		$remark = mysqli_real_escape_string($conn, $_POST['remark']);
-		$fees = mysqli_real_escape_string($conn, $_POST['fees']);
-		$advancefees = mysqli_real_escape_string($conn, $_POST['advancefees']);
-		$balance = $fees - $advancefees;
-
-		$q1 = $conn->query("INSERT INTO student (sname,joindate,contact,about,emailid,grade,balance,fees) VALUES ('$sname','$joindate','$contact','$about','$emailid','$grade','$balance','$fees')");
-
-		$sid = $conn->insert_id;
-
-		$conn->query("INSERT INTO  fees_transaction (stdid,paid,submitdate,transcation_remark) VALUES ('$sid','$advancefees','$joindate','$remark')");
-
-		echo '<script type="text/javascript">window.location="student.php?act=1";</script>';
-
-	} else
+	// Validate Student ID format (12 digits)
+	if (!preg_match('/^\d{12}$/', $student_id)) {
+		$errormsg = "<div class='alert alert-danger'> <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Error: Student ID must be exactly 12 digits!</div>";
+	}
+	// Validate Contact format (Philippine mobile number)
+	else if (!preg_match('/^09\d{9}$/', $contact)) {
+		$errormsg = "<div class='alert alert-danger'> <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Error: Contact number must be a Philippine mobile number starting with 09 and 11 digits total!</div>";
+	} else {
+		// Check for duplicate student ID
+		$duplicate_check_query = "SELECT id FROM student WHERE student_id = '$student_id' AND delete_status = '0'";
 		if ($_POST['action'] == "update") {
-			$id = mysqli_real_escape_string($conn, $_POST['id']);
-			$sql = $conn->query("UPDATE  student  SET  grade  = '$grade', sname = '$sname', contact = '$contact', about = '$about', emailid = '$emailid'  WHERE  id  = '$id'");
-			echo '<script type="text/javascript">window.location="student.php?act=2";</script>';
+			$current_id = mysqli_real_escape_string($conn, $_POST['id']);
+			$duplicate_check_query .= " AND id != '$current_id'";
 		}
 
+		$duplicate_result = $conn->query($duplicate_check_query);
 
+		if ($duplicate_result->num_rows > 0) {
+			$errormsg = "<div class='alert alert-danger'> <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Error: Student ID '$student_id' already exists! Please use a different ID number.</div>";
+		} else {
 
+			if ($_POST['action'] == "add") {
+				$remark = mysqli_real_escape_string($conn, $_POST['remark']);
+				$fees = mysqli_real_escape_string($conn, $_POST['fees']);
+				$advancefees = mysqli_real_escape_string($conn, $_POST['advancefees']);
+				$balance = $fees - $advancefees;
+
+				// Debugging: Check if all required fields have values
+				if (empty($sname) || empty($contact) || empty($grade) || empty($fees)) {
+					$errormsg = "<div class='alert alert-danger'> <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Error: Please fill all required fields!</div>";
+				} else {
+					$q1 = $conn->query("INSERT INTO student (student_id,sname,contact,about,emailid,grade,balance,fees) VALUES ('$student_id','$sname','$contact','$about','$emailid','$grade','$balance','$fees')");
+
+					if ($q1) {
+						$sid = $conn->insert_id;
+						$conn->query("INSERT INTO  fees_transaction (stdid,paid,submitdate,transcation_remark) VALUES ('$sid','$advancefees','$remark')");
+						echo '<script type="text/javascript">window.location="student.php?act=1";</script>';
+					} else {
+						$errormsg = "<div class='alert alert-danger'> <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Error: Failed to save student record. " . $conn->error . "</div>";
+					}
+				}
+			} else
+				if ($_POST['action'] == "update") {
+					$id = mysqli_real_escape_string($conn, $_POST['id']);
+					$sql = $conn->query("UPDATE  student  SET  student_id = '$student_id', grade  = '$grade', sname = '$sname', contact = '$contact', about = '$about', emailid = '$emailid'  WHERE  id  = '$id'");
+					echo '<script type="text/javascript">window.location="student.php?act=2";</script>';
+				}
+		}
+	}
 }
 
 
@@ -156,18 +180,34 @@ include("php/header.php");
 							<div class="panel-body">
 								<fieldset class="scheduler-border">
 									<legend class="scheduler-border">Personal Information:</legend>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" for="Old">Student ID* </label>
+										<div class="col-sm-10">
+											<input type="text" class="form-control" id="student_id" name="student_id"
+												value="<?php echo $student_id; ?>" placeholder="e.g. 202400000001"
+												maxlength="12" />
+											<small class="help-text">Enter exactly 12 digits (e.g., 202400000001)</small>
+										</div>
+									</div>
+
 									<div class="form-group">
 										<label class="col-sm-2 control-label" for="Old">Full Name* </label>
 										<div class="col-sm-10">
 											<input type="text" class="form-control" id="sname" name="sname"
-												value="<?php echo $sname; ?>" />
+												value="<?php echo $sname; ?>" placeholder="e.g. Dela Cruz, Juan, A." />
+											<small class="help-text">Suggested format: Surname, First Name, M.I (e.g., Dela
+												Cruz, Juan, A.)</small>
 										</div>
 									</div>
 									<div class="form-group">
 										<label class="col-sm-2 control-label" for="Old">Contact* </label>
 										<div class="col-sm-10">
 											<input type="text" class="form-control" id="contact" name="contact"
-												value="<?php echo $contact; ?>" maxlength="10" />
+												value="<?php echo $contact; ?>" maxlength="11"
+												placeholder="e.g. 09123456789" />
+											<small class="help-text">Philippine mobile number format: 09xxxxxxxxx (11
+												digits)</small>
 										</div>
 									</div>
 
@@ -177,28 +217,20 @@ include("php/header.php");
 											<select class="form-control" id="grade" name="grade">
 												<option value="">Select Grade Level</option>
 												<?php
-												$sql = "select * from grade where delete_status='0' order by grade.grade asc";
+												// Modified query to fetch all grade information including section and semester
+												$sql = "select * from grade where delete_status='0' order by grade.grade asc, grade.section asc, grade.semester asc";
 												$q = $conn->query($sql);
 
 												while ($r = $q->fetch_assoc()) {
-													echo '<option value="' . $r['id'] . '"  ' . (($grade == $r['id']) ? 'selected="selected"' : '') . '>' . $r['grade'] . '</option>';
+													// Display complete grade information: Grade - Section (Semester)
+													$grade_display = $r['grade'] . ' - ' . $r['section'] . ' (' . $r['semester'] . ' Semester)';
+													echo '<option value="' . $r['id'] . '"  ' . (($grade == $r['id']) ? 'selected="selected"' : '') . '>' . $grade_display . '</option>';
 												}
 												?>
-
 											</select>
 										</div>
 									</div>
 
-
-									<div class="form-group">
-										<label class="col-sm-2 control-label" for="Old">DOJ* </label>
-										<div class="col-sm-10">
-											<input type="text" class="form-control" placeholder="Date of Joining"
-												id="joindate" name="joindate"
-												value="<?php echo ($joindate != '') ? date("Y-m-d", strtotime($joindate)) : ''; ?>"
-												style="background-color: #fff;" readonly />
-										</div>
-									</div>
 								</fieldset>
 
 
@@ -307,14 +339,58 @@ include("php/header.php");
 
 				$(document).ready(function () {
 
-					$("#joindate").datepicker({
-						dateFormat: "yy-mm-dd",
-						changeMonth: true,
-						changeYear: true,
-						yearRange: "1970:<?php echo date('Y'); ?>"
+					// Add custom validation methods
+					jQuery.validator.addMethod("studentIdFormat", function (value, element) {
+						return this.optional(element) || /^\d{12}$/.test(value);
+					}, "Student ID must be exactly 12 digits");
+
+					jQuery.validator.addMethod("phoneFormat", function (value, element) {
+						return this.optional(element) || /^09\d{9}$/.test(value);
+					}, "Contact must be a Philippine mobile number (09xxxxxxxxx)");
+
+					// Add remote validation for student ID
+					jQuery.validator.addMethod("checkStudentId", function (value, element) {
+						var result = false;
+						var currentId = "<?php echo $id; ?>";
+						$.ajax({
+							type: "POST",
+							url: "checkstdid.php", // You'll need to create this file
+							data: { student_id: value, current_id: currentId },
+							dataType: "json",
+							async: false,
+							success: function (data) {
+								result = data.available;
+							}
+						});
+						return result;
+					}, "This Student ID already exists. Please use a different ID number.");
+
+					// Input formatting and restrictions
+					$("#student_id").on('input', function () {
+						// Only allow digits
+						this.value = this.value.replace(/[^0-9]/g, '');
+						// Limit to 12 characters
+						if (this.value.length > 12) {
+							this.value = this.value.slice(0, 12);
+						}
 					});
 
-
+					$("#contact").on('input', function () {
+						// Only allow digits
+						this.value = this.value.replace(/[^0-9]/g, '');
+						// Limit to 11 characters
+						if (this.value.length > 11) {
+							this.value = this.value.slice(0, 11);
+						}
+						// Auto-format with 09 prefix
+						if (this.value.length >= 1 && !this.value.startsWith('09')) {
+							if (this.value.startsWith('9')) {
+								this.value = '0' + this.value;
+							} else if (!this.value.startsWith('0')) {
+								this.value = '09' + this.value.slice(0, 9);
+							}
+						}
+					});
 
 					if ($("#signupForm1").length > 0) {
 
@@ -323,15 +399,21 @@ include("php/header.php");
 
 							$("#signupForm1").validate({
 								rules: {
-									sname: "required",
-									joindate: "required",
+									student_id: {
+										required: true,
+										studentIdFormat: true,
+										checkStudentId: true
+									},
+									sname: {
+										required: true
+									},
+					
 									emailid: "email",
 									grade: "required",
 
-
 									contact: {
 										required: true,
-										digits: true
+										phoneFormat: true
 									},
 
 									fees: {
@@ -339,29 +421,30 @@ include("php/header.php");
 										digits: true
 									},
 
-
 									advancefees: {
 										required: true,
 										digits: true
 									},
-
 
 								},
 								<?php
 						} else {
 							?>
 			
-									$( "#signupForm1").validate({
+													$("#signupForm1").validate({
 									rules: {
+										student_id: {
+											required: true,
+											studentIdFormat: true,
+											checkStudentId: true
+										},
 										sname: "required",
-										joindate: "required",
 										emailid: "email",
 										grade: "required",
 
-
 										contact: {
 											required: true,
-											digits: true
+											phoneFormat: true
 										}
 
 									},
@@ -372,7 +455,7 @@ include("php/header.php");
 						}
 						?>
 				
-							errorElement: "em",
+											errorElement: "em",
 								errorPlacement: function (error, element) {
 									// Add the `help-block` class to the error element
 									error.addClass("help-block");
@@ -410,7 +493,7 @@ include("php/header.php");
 
 						}
 			
-					} );
+							} );
 
 
 
@@ -473,10 +556,11 @@ include("php/header.php");
 						<table class="table table-striped table-bordered table-hover" id="tSortable22">
 							<thead>
 								<tr>
-									<th>#</th>
+									<th>ID Number</th>
 									<th>Name | Contact</th>
 									<th>Grade</th>
-									<th>Joined On</th>
+									<th>Section</th>
+									<th>Semester</th>
 									<th>Fees</th>
 									<th>Balance</th>
 									<th>Actions</th>
@@ -484,37 +568,35 @@ include("php/header.php");
 							</thead>
 							<tbody>
 								<?php
-								$sql = "SELECT student.*, grade.grade as grade_name 
-        FROM student 
-        LEFT JOIN grade ON student.grade = grade.id 
-        WHERE student.delete_status='0'";
+								$sql = "SELECT student.*, 
+                                grade.grade as grade_level,
+                                grade.section,
+                                grade.semester
+                            FROM student 
+                            LEFT JOIN grade ON student.grade = grade.id 
+                            WHERE student.delete_status='0'
+                            ORDER BY student.sname ASC";
 
 								$q = $conn->query($sql);
 								$i = 1;
 								while ($r = $q->fetch_assoc()) {
-
 									echo '<tr ' . (($r['balance'] > 0) ? 'class="primary"' : '') . '>
-                                            <td>' . $i . '</td>
-											<td>' . $r['sname'] . '<br/>' . $r['contact'] . '</td>
-											<td>' . $r['grade_name'] . '</td>
-                                            <td>' . date("d M y", strtotime($r['joindate'])) . '</td>
-                                            <td>' . $r['fees'] . '</td>
-											<td>' . $r['balance'] . '</td>
-											<td>
-											
-											
-
-											<a href="student.php?action=edit&id=' . $r['id'] . '" class="btn btn-success btn-xs" style="border-radius:60px;"><span class="glyphicon glyphicon-edit"></span></a>
-											
-											<a onclick="return confirm(\'Are you sure you want to deactivate this record\');" href="student.php?action=delete&id=' . $r['id'] . '" class="btn btn-danger btn-xs" style="border-radius:60px;"><span class="glyphicon glyphicon-remove"></span></a> </td>
-											
-                                        </tr>';
+                                <td><strong>' . $r['student_id'] . '</strong></td>
+                                <td>' . $r['sname'] . '<br/>' . $r['contact'] . '</td>
+                                <td>' . $r['grade_level'] . '</td>
+                                <td>' . $r['section'] . '</td>
+                                <td>' . $r['semester'] . '</td>
+                                <td>' . $r['fees'] . '</td>
+                                <td>' . $r['balance'] . '</td>
+                                <td>
+                                    <a href="student.php?action=edit&id=' . $r['id'] . '" class="btn btn-success btn-xs" style="border-radius:60px;"><span class="glyphicon glyphicon-edit"></span></a>
+                                    
+                                    <a onclick="return confirm(\'Are you sure you want to deactivate this record\');" href="student.php?action=delete&id=' . $r['id'] . '" class="btn btn-danger btn-xs" style="border-radius:60px;"><span class="glyphicon glyphicon-remove"></span></a>
+                                </td>
+                            </tr>';
 									$i++;
 								}
 								?>
-
-
-
 							</tbody>
 						</table>
 					</div>
