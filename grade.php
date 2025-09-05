@@ -4,26 +4,28 @@ include("php/checklogin.php");
 $errormsg = '';
 $action = "add";
 
+$strand = '';
 $grade = '';
 $section = '';
 $semester = '';
 $id = '';
 if (isset($_POST['save'])) {
 
+	$strand = mysqli_real_escape_string($conn, $_POST['strand']);
 	$grade = mysqli_real_escape_string($conn, $_POST['grade']);
 	$section = mysqli_real_escape_string($conn, $_POST['section']);
 	$semester = mysqli_real_escape_string($conn, $_POST['semester']);
 
 	if ($_POST['action'] == "add") {
 
-		$sql = $conn->query("INSERT INTO grade (grade,section,semester) VALUES ('$grade','$section','$semester')");
+		$sql = $conn->query("INSERT INTO grade (strand,grade,section,semester) VALUES ('$strand','$grade','$section','$semester')");
 
 		echo '<script type="text/javascript">window.location="grade.php?act=1";</script>';
 
 	} else
 		if ($_POST['action'] == "update") {
 			$id = mysqli_real_escape_string($conn, $_POST['id']);
-			$sql = $conn->query("UPDATE  grade  SET  grade  = '$grade', section  = '$section', semester  = '$semester'  WHERE  id  = '$id'");
+			$sql = $conn->query("UPDATE  grade  SET  strand  = '$strand', grade  = '$grade', section  = '$section', semester  = '$semester'  WHERE  id  = '$id'");
 			echo '<script type="text/javascript">window.location="grade.php?act=2";</script>';
 		}
 
@@ -133,161 +135,173 @@ include("php/header.php");
 						<form action="grade.php" method="post" id="signupForm1" class="form-horizontal">
 							<div class="panel-body">
 
-
-
-
 								<div class="form-group">
-									<label class="col-sm-2 control-label" for="grade">Grade Level </label>
+									<label class="col-sm-2 control-label" for="strand">Strand/Course </label>
 									<div class="col-sm-10">
-										<input type="text" class="form-control" id="grade" name="grade"
-											value="<?php echo $grade; ?>" placeholder="e.g., Grade 1, Grade 7, etc." />
+										<input type="text" class="form-control" id="strand" name="strand"
+											value="<?php echo $strand; ?>"
+											placeholder="e.g., STEM, HUMSS, ABM, Elementary, etc." />
 									</div>
 								</div>
-
-
-								<div class="form-group">
-									<label class="col-sm-2 control-label" for="section">Section </label>
-									<div class="col-sm-10">
-										<input type="text" class="form-control" id="section" name="section"
-											value="<?php echo $section; ?>" placeholder="e.g., A, B, Einstein, etc." />
-									</div>
-								</div>
-
-
-								<div class="form-group">
-									<label class="col-sm-2 control-label" for="semester">Semester </label>
-									<div class="col-sm-10">
-										<select class="form-control" id="semester" name="semester">
-											<option value="">Select Semester</option>
-											<option value="1st" <?php echo ($semester == '1st') ? 'selected' : ''; ?>>1st Semester
-											</option>
-											<option value="2nd" <?php echo ($semester == '2nd') ? 'selected' : ''; ?>>2nd Semester
-											</option>
-										</select>
-									</div>
-								</div>
-
-								<div class="form-group">
-									<div class="col-sm-8 col-sm-offset-2">
-										<input type="hidden" name="id" value="<?php echo $id; ?>">
-										<input type="hidden" name="action" value="<?php echo $action; ?>">
-
-										<button type="submit" name="save" class="btn btn-success"
-											style="border-radius:0%">Save </button>
-									</div>
-								</div>
-
-
-
-
-
 							</div>
-						</form>
+
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="grade">Grade Level </label>
+								<div class="col-sm-10">
+									<input type="text" class="form-control" id="grade" name="grade"
+										value="<?php echo $grade; ?>"
+										placeholder="e.g., Grade 1, Grade 7, Grade 11, etc." />
+								</div>
+							</div>
+
+
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="section">Section </label>
+								<div class="col-sm-10">
+									<input type="text" class="form-control" id="section" name="section"
+										value="<?php echo $section; ?>" placeholder="e.g., A, B, Einstein, etc." />
+								</div>
+							</div>
+
+
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="semester">Semester </label>
+								<div class="col-sm-10">
+									<select class="form-control" id="semester" name="semester">
+										<option value="">Select Semester</option>
+										<option value="1st" <?php echo ($semester == '1st') ? 'selected' : ''; ?>>1st Semester
+										</option>
+										<option value="2nd" <?php echo ($semester == '2nd') ? 'selected' : ''; ?>>2nd Semester
+										</option>
+									</select>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="col-sm-8 col-sm-offset-2">
+									<input type="hidden" name="id" value="<?php echo $id; ?>">
+									<input type="hidden" name="action" value="<?php echo $action; ?>">
+
+									<button type="submit" name="save" class="btn btn-success" style="border-radius:0%">Save
+									</button>
+								</div>
+							</div>
+
+
+
+
 
 					</div>
+					</form>
+
 				</div>
-
-
 			</div>
 
 
+		</div>
 
 
-			<script type="text/javascript">
 
 
-				$(document).ready(function () {
+		<script type="text/javascript">
 
-					if ($("#signupForm1").length > 0) {
-						$("#signupForm1").validate({
-							rules: {
-								grade: "required",
-								section: "required",
-								semester: "required"
 
-							},
-							messages: {
-								grade: "Please enter grade level",
-								section: "Please enter section",
-								semester: "Please select semester"
+			$(document).ready(function () {
 
-							},
-							errorElement: "em",
-							errorPlacement: function (error, element) {
-								// Add the `help-block` class to the error element
-								error.addClass("help-block");
+				if ($("#signupForm1").length > 0) {
+					$("#signupForm1").validate({
+						rules: {
+							strand: "required",
+							grade: "required",
+							section: "required",
+							semester: "required"
 
-								// Add `has-feedback` class to the parent div.form-group
-								// in order to add icons to inputs
-								element.parents(".col-sm-10").addClass("has-feedback");
+						},
+						messages: {
+							strand: "Please select strand/course",
+							grade: "Please enter grade level",
+							section: "Please enter section",
+							semester: "Please select semester"
 
-								if (element.prop("type") === "checkbox") {
-									error.insertAfter(element.parent("label"));
-								} else {
-									error.insertAfter(element);
-								}
+						},
+						errorElement: "em",
+						errorPlacement: function (error, element) {
+							// Add the `help-block` class to the error element
+							error.addClass("help-block");
 
-								// Add the span element, if doesn't exists, and apply the icon classes to it.
-								if (!element.next("span")[0]) {
-									$("<span class='glyphicon glyphicon-remove form-control-feedback'></span>").insertAfter(element);
-								}
-							},
-							success: function (label, element) {
-								// Add the span element, if doesn't exists, and apply the icon classes to it.
-								if (!$(element).next("span")[0]) {
-									$("<span class='glyphicon glyphicon-ok form-control-feedback'></span>").insertAfter($(element));
-								}
-							},
-							highlight: function (element, errorClass, validClass) {
-								$(element).parents(".col-sm-10").addClass("has-error").removeClass("has-success");
-								$(element).next("span").addClass("glyphicon-remove").removeClass("glyphicon-ok");
-							},
-							unhighlight: function (element, errorClass, validClass) {
-								$(element).parents(".col-sm-10").addClass("has-success").removeClass("has-error");
-								$(element).next("span").addClass("glyphicon-ok").removeClass("glyphicon-remove");
+							// Add `has-feedback` class to the parent div.form-group
+							// in order to add icons to inputs
+							element.parents(".col-sm-10").addClass("has-feedback");
+
+							if (element.prop("type") === "checkbox") {
+								error.insertAfter(element.parent("label"));
+							} else {
+								error.insertAfter(element);
 							}
-						});
 
-					}
+							// Add the span element, if doesn't exists, and apply the icon classes to it.
+							if (!element.next("span")[0]) {
+								$("<span class='glyphicon glyphicon-remove form-control-feedback'></span>").insertAfter(element);
+							}
+						},
+						success: function (label, element) {
+							// Add the span element, if doesn't exists, and apply the icon classes to it.
+							if (!$(element).next("span")[0]) {
+								$("<span class='glyphicon glyphicon-ok form-control-feedback'></span>").insertAfter($(element));
+							}
+						},
+						highlight: function (element, errorClass, validClass) {
+							$(element).parents(".col-sm-10").addClass("has-error").removeClass("has-success");
+							$(element).next("span").addClass("glyphicon-remove").removeClass("glyphicon-ok");
+						},
+						unhighlight: function (element, errorClass, validClass) {
+							$(element).parents(".col-sm-10").addClass("has-success").removeClass("has-error");
+							$(element).next("span").addClass("glyphicon-ok").removeClass("glyphicon-remove");
+						}
+					});
 
-				});
-			</script>
+				}
+
+			});
+		</script>
 
 
 
-			<?php
+		<?php
 		} else {
 			?>
 
-			<link href="css/datatable/datatable.css" rel="stylesheet" />
+		<link href="css/datatable/datatable.css" rel="stylesheet" />
 
 
 
 
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					Manage Grade Level
-				</div>
-				<div class="panel-body">
-					<div class="table-sorting table-responsive">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				Manage Grade Level
+			</div>
+			<div class="panel-body">
+				<div class="table-sorting table-responsive">
 
-						<table class="table table-striped table-bordered table-hover" id="tSortable22">
-							<thead>
-								<tr>
-									<th>#</th>
-									<th>Grade & Section</th>
-									<th>Semester</th>
-									<th>Action</th>
-								</tr>
-							</thead>
-							<tbody>
-								<?php
-								$sql = "select * from grade where delete_status='0' ORDER BY grade, section, semester";
-								$q = $conn->query($sql);
-								$i = 1;
-								while ($r = $q->fetch_assoc()) {
-									echo '<tr>
+					<table class="table table-striped table-bordered table-hover" id="tSortable22">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Strand/Course</th>
+								<th>Grade & Section</th>
+								<th>Semester</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php
+							$sql = "select * from grade where delete_status='0' ORDER BY strand, grade, section, semester";
+							$q = $conn->query($sql);
+							$i = 1;
+							while ($r = $q->fetch_assoc()) {
+								echo '<tr>
                                             <td>' . $i . '</td>
+                                            <td>' . $r['strand'] . '</td>
                                             <td>' . $r['grade'] . ' - ' . $r['section'] . '</td>
                                             <td>' . $r['semester'] . ' Semester</td>
 											<td>
@@ -295,42 +309,42 @@ include("php/header.php");
 											
 											<a onclick="return confirm(\'Are you sure you want to delete this record\');" href="grade.php?action=delete&id=' . $r['id'] . '" class="btn btn-danger btn-xs" style="border-radius:60px;"><span class="glyphicon glyphicon-remove"></span></a> </td>
                                         </tr>';
-									$i++;
-								}
-								?>
+								$i++;
+							}
+							?>
 
 
 
-							</tbody>
-						</table>
-					</div>
+						</tbody>
+					</table>
 				</div>
 			</div>
+		</div>
 
-			<script src="js/dataTable/jquery.dataTables.min.js"></script>
-			<script>
-				$(document).ready(function () {
-					$('#tSortable22').dataTable({
-						"bPaginate": true,
-						"bLengthChange": false,
-						"bFilter": true,
-						"bInfo": false,
-						"bAutoWidth": true
-					});
-
+		<script src="js/dataTable/jquery.dataTables.min.js"></script>
+		<script>
+			$(document).ready(function () {
+				$('#tSortable22').dataTable({
+					"bPaginate": true,
+					"bLengthChange": false,
+					"bFilter": true,
+					"bInfo": false,
+					"bAutoWidth": true
 				});
 
+			});
 
-			</script>
 
-			<?php
+		</script>
+
+		<?php
 		}
 		?>
 
 
 
-	</div>
-	<!-- /. PAGE INNER  -->
+</div>
+<!-- /. PAGE INNER  -->
 </div>
 <!-- /. PAGE WRAPPER  -->
 </div>
