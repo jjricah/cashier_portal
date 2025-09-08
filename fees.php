@@ -123,26 +123,7 @@ include("php/header.php");
 
     <script type="text/javascript">
       $(document).ready(function () {
-        $('#student').autocomplete({
-          source: function (request, response) {
-            $.ajax({
-              url: 'ajx.php',
-              dataType: "json",
-              data: {
-                name_startsWith: request.term,
-                type: 'studentname'
-              },
-              success: function (data) {
-                response($.map(data, function (item) {
-                  return {
-                    label: item,
-                    value: item
-                  }
-                }));
-              }
-            });
-          }
-        });
+        // ...existing autocomplete code...
 
         $('#find').click(function () {
           mydatatable();
@@ -154,7 +135,7 @@ include("php/header.php");
         });
 
         function mydatatable() {
-          $("#subjectresult").html('<table class="table table-striped table-bordered table-hover" id="tSortable22"><thead><tr><th>Name/Contact</th><th>Fees</th><th>Balance</th><th>Grade</th><th>Action</th></tr></thead><tbody></tbody></table>');
+          $("#subjectresult").html('<table class="table table-striped table-bordered table-hover" id="tSortable22"><thead><tr><th>Name/Contact</th><th>Strand/Course</th><th>Grade & Section</th><th>Semester</th><th>Fees</th><th>Balance</th><th>Actions</th></tr></thead><tbody></tbody></table>');
 
           $("#tSortable22").dataTable({
             'sPaginationType': 'full_numbers',
@@ -164,28 +145,24 @@ include("php/header.php");
             'bProcessing': true,
             'bServerSide': true,
             'sAjaxSource': "datatable.php?" + $('#searchform').serialize() + "&type=feesearch",
+            'aoColumns': [
+              { 'mData': 0 }, // Name/Contact
+              { 'mData': 1 }, // Strand/Course
+              { 'mData': 2 }, // Grade & Section
+              { 'mData': 3 }, // Semester
+              { 'mData': 4 }, // Fees
+              { 'mData': 5 }, // Balance
+              { 'mData': 6 }  // Actions
+            ],
             'aoColumnDefs': [{
               'bSortable': false,
               'aTargets': [-1]
             }]
           });
         }
-
-        $("#tSortable22").dataTable({
-          'sPaginationType': 'full_numbers',
-          "bLengthChange": false,
-          "bFilter": false,
-          "bInfo": false,
-          'bProcessing': true,
-          'bServerSide': true,
-          'sAjaxSource': "datatable.php?type=feesearch",
-          'aoColumnDefs': [{
-            'bSortable': false,
-            'aTargets': [-1]
-          }]
-        });
       });
 
+      // Move GetFeeForm outside document.ready
       function GetFeeForm(sid) {
         $.ajax({
           type: 'post',
@@ -213,19 +190,46 @@ include("php/header.php");
         Manage Fees
       </div>
       <div class="panel-body">
-        <div class="table-sorting table-responsive" id="subjectresult">
+        <div class="table-sorting table-responsive">
           <table class="table table-striped table-bordered table-hover" id="tSortable22">
             <thead>
               <tr>
-
-                <th>Name/Contact</th>
+                <th>Name | Contact</th>
+                <th>Strand/Course</th>
+                <th>Grade & Section</th>
+                <th>Semester</th>
                 <th>Fees</th>
                 <th>Balance</th>
-                <th>Grade</th>
-                <th>Action</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
+              <?php
+              $sql = "SELECT student.*, 
+                grade.strand,
+                grade.grade as grade_level,
+                grade.section,
+                grade.semester
+            FROM student 
+            LEFT JOIN grade ON student.grade = grade.id 
+            WHERE student.delete_status='0' AND student.balance > 0
+            ORDER BY grade.strand ASC, grade.grade ASC, student.sname ASC";
+
+              $q = $conn->query($sql);
+              while ($r = $q->fetch_assoc()) {
+                echo '<tr>
+                <td>' . $r['sname'] . '<br/>' . $r['contact'] . '</td>
+                <td>' . $r['strand'] . '</td>
+                <td>' . $r['grade_level'] . ' - ' . $r['section'] . '</td>
+                <td>' . $r['semester'] . '</td>
+                <td>' . $r['fees'] . '</td>
+                <td>' . $r['balance'] . '</td>
+                <td>' .
+                  html_entity_decode('<button class="btn btn-success btn-sm" style="border-radius:0%" onclick="javascript:GetFeeForm(' . $r['id'] . ')"><i class="fa fa-money"></i> Collect Fee </button>') .
+                  '</td>
+            </tr>';
+              }
+              ?>
             </tbody>
           </table>
         </div>
