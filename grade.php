@@ -140,7 +140,7 @@ include("php/header.php");
 									<div class="col-sm-10">
 										<input type="text" class="form-control" id="strand" name="strand"
 											value="<?php echo $strand; ?>"
-											placeholder="e.g., STEM, HUMSS, ABM, Elementary, etc." />
+											placeholder="e.g., STEM, HUMSS, ABM, etc." />
 									</div>
 								</div>
 							</div>

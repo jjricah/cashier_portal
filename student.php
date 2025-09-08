@@ -212,18 +212,18 @@ include("php/header.php");
 									</div>
 
 									<div class="form-group">
-										<label class="col-sm-2 control-label" for="Old">Grade* </label>
+										<label class="col-sm-2 control-label" for="Old">Grade Level* </label>
 										<div class="col-sm-10">
 											<select class="form-control" id="grade" name="grade">
 												<option value="">Select Grade Level</option>
 												<?php
-												// Modified query to fetch all grade information including section and semester
-												$sql = "select * from grade where delete_status='0' order by grade.grade asc, grade.section asc, grade.semester asc";
+												// Modified query to fetch all grade information including strand, section and semester
+												$sql = "select * from grade where delete_status='0' order by grade.strand asc, grade.grade asc, grade.section asc, grade.semester asc";
 												$q = $conn->query($sql);
 
 												while ($r = $q->fetch_assoc()) {
-													// Display complete grade information: Grade - Section (Semester)
-													$grade_display = $r['grade'] . ' - ' . $r['section'] . ' (' . $r['semester'] . ' Semester)';
+													// Display complete grade information: Strand - Grade - Section (Semester)
+													$grade_display = $r['strand'] . ' - ' . $r['grade'] . ' - ' . $r['section'] . ' (' . $r['semester'] . ' Semester)';
 													echo '<option value="' . $r['id'] . '"  ' . (($grade == $r['id']) ? 'selected="selected"' : '') . '>' . $grade_display . '</option>';
 												}
 												?>
@@ -407,7 +407,7 @@ include("php/header.php");
 									sname: {
 										required: true
 									},
-					
+
 									emailid: "email",
 									grade: "required",
 
@@ -431,7 +431,7 @@ include("php/header.php");
 						} else {
 							?>
 			
-													$("#signupForm1").validate({
+															$("#signupForm1").validate({
 									rules: {
 										student_id: {
 											required: true,
@@ -455,7 +455,7 @@ include("php/header.php");
 						}
 						?>
 				
-											errorElement: "em",
+												errorElement: "em",
 								errorPlacement: function (error, element) {
 									// Add the `help-block` class to the error element
 									error.addClass("help-block");
@@ -493,7 +493,7 @@ include("php/header.php");
 
 						}
 			
-							} );
+								} );
 
 
 
@@ -558,8 +558,8 @@ include("php/header.php");
 								<tr>
 									<th>ID Number</th>
 									<th>Name | Contact</th>
-									<th>Grade</th>
-									<th>Section</th>
+									<th>Strand/Course</th>
+									<th>Grade & Section</th>
 									<th>Semester</th>
 									<th>Fees</th>
 									<th>Balance</th>
@@ -569,13 +569,14 @@ include("php/header.php");
 							<tbody>
 								<?php
 								$sql = "SELECT student.*, 
+                                grade.strand,
                                 grade.grade as grade_level,
                                 grade.section,
                                 grade.semester
                             FROM student 
                             LEFT JOIN grade ON student.grade = grade.id 
                             WHERE student.delete_status='0'
-                            ORDER BY student.sname ASC";
+                            ORDER BY grade.strand ASC, grade.grade ASC, student.sname ASC";
 
 								$q = $conn->query($sql);
 								$i = 1;
@@ -583,8 +584,8 @@ include("php/header.php");
 									echo '<tr ' . (($r['balance'] > 0) ? 'class="primary"' : '') . '>
                                 <td><strong>' . $r['student_id'] . '</strong></td>
                                 <td>' . $r['sname'] . '<br/>' . $r['contact'] . '</td>
-                                <td>' . $r['grade_level'] . '</td>
-                                <td>' . $r['section'] . '</td>
+                                <td>' . $r['strand'] . '</td>
+                                <td>' . $r['grade_level'] . ' - ' . $r['section'] . '</td>
                                 <td>' . $r['semester'] . '</td>
                                 <td>' . $r['fees'] . '</td>
                                 <td>' . $r['balance'] . '</td>
