@@ -68,9 +68,6 @@ if (isset($_REQUEST['act']) && @$_REQUEST['act'] == "1") {
             <div class="row">
                 <div class="col-md-12">
                     <h1 class="page-head-line">In-Active Students
-                        <small class="text-muted" style="font-size: 14px; margin-left: 10px;">
-                            Students who have been deactivated from the system
-                        </small>
                     </h1>
 
                     <?php echo $errormsg; ?>
