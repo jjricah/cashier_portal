@@ -7,7 +7,6 @@ $action = "add";
 $id = "";
 $emailid = '';
 $sname = '';
-$joindate = '';
 $remark = '';
 $contact = '';
 $balance = 0;
@@ -115,7 +114,6 @@ if (isset($_REQUEST['act']) && @$_REQUEST['act'] == "1") {
                                         <th>Strand/Course</th>
                                         <th>Grade & Section</th>
                                         <th>Last Semester</th>
-                                        <th>Joined On</th>
                                         <th>Fees</th>
                                         <th>Balance</th>
                                         <th>Actions</th>
@@ -124,14 +122,14 @@ if (isset($_REQUEST['act']) && @$_REQUEST['act'] == "1") {
                                 <tbody>
                                     <?php
                                     $sql = "SELECT student.*, 
-                                        COALESCE(grade.strand, 'N/A') as strand,
-                                        COALESCE(grade.grade, 'N/A') as grade_level,
-                                        COALESCE(grade.section, 'N/A') as section,
-                                        COALESCE(grade.semester, 'N/A') as semester
-                                    FROM student 
-                                    LEFT JOIN grade ON student.grade = grade.id 
-                                    WHERE student.delete_status='1'
-                                    ORDER BY student.sname ASC";
+                                    COALESCE(grade.strand, 'N/A') as strand,
+                                    COALESCE(grade.grade, 'N/A') as grade_level,
+                                    COALESCE(grade.section, 'N/A') as section,
+                                    COALESCE(grade.semester, 'N/A') as semester
+                                FROM student 
+                                LEFT JOIN grade ON student.grade = grade.id 
+                                WHERE student.delete_status='1'
+                                ORDER BY student.sname ASC";
 
                                     $q = $conn->query($sql);
                                     $has_records = false;
@@ -146,16 +144,15 @@ if (isset($_REQUEST['act']) && @$_REQUEST['act'] == "1") {
                                             }
 
                                             echo '<tr ' . $row_class . '>
-                                                <td><strong>' . htmlspecialchars($r['student_id']) . '</strong></td>
-                                                <td>' . htmlspecialchars($r['sname']) . '<br/>
-                                                    <small class="text-muted">' . htmlspecialchars($r['contact']) . '</small>
-                                                </td>
-                                                <td>' . htmlspecialchars($r['strand']) . '</td>
-                                                <td>' . htmlspecialchars($r['grade_level']) . ' - ' . htmlspecialchars($r['section']) . '</td>
-                                                <td>' . htmlspecialchars($r['semester']) . ' Sem</td>
-                                                <td>' . date("d M Y", strtotime($r['joindate'])) . '</td>
-                                                <td>₱' . number_format($r['fees'], 2) . '</td>
-                                                <td>' .
+                                            <td><strong>' . htmlspecialchars($r['student_id']) . '</strong></td>
+                                            <td>' . htmlspecialchars($r['sname']) . '<br/>
+                                                <small class="text-muted">' . htmlspecialchars($r['contact']) . '</small>
+                                            </td>
+                                            <td>' . htmlspecialchars($r['strand']) . '</td>
+                                            <td>' . htmlspecialchars($r['grade_level']) . ' - ' . htmlspecialchars($r['section']) . '</td>
+                                            <td>' . htmlspecialchars($r['semester']) . ' Sem</td>
+                                            <td>₱' . number_format($r['fees'], 2) . '</td>
+                                            <td>' .
                                                 (($r['balance'] > 0) ?
                                                     '<span class="text-danger"><strong>₱' . number_format($r['balance'], 2) . '</strong></span>' :
                                                     '<span class="text-success">₱0.00</span>'
@@ -164,19 +161,19 @@ if (isset($_REQUEST['act']) && @$_REQUEST['act'] == "1") {
                                                 <td>
                                                 <div class="btn-group" role="group">
                                                     <a href="inactivestd.php?action=approve&id=' . $r['id'] . '" 
-                                                       class="btn btn-success btn-xs" 
-                                                       style="border-radius:3px;" 
-                                                       title="Reactivate Student"
-                                                       onclick="return confirm(\'Are you sure you want to reactivate this student?\');">
-                                                       <span class="glyphicon glyphicon-ok"></span> Activate
+                                                    class="btn btn-success btn-xs" 
+                                                    style="border-radius:3px;" 
+                                                    title="Reactivate Student"
+                                                    onclick="return confirm(\'Are you sure you want to reactivate this student?\');">
+                                                    <span class="glyphicon glyphicon-ok"></span> Activate
                                                     </a>
                                                 
                                                     <a onclick="return confirm(\'Are you sure you want to delete this record permanently? This action cannot be undone!\');" 
-                                                       href="inactivestd.php?action=delete&id=' . $r['id'] . '" 
-                                                       class="btn btn-danger btn-xs" 
-                                                       style="border-radius:3px;" 
-                                                       title="Delete Permanently">
-                                                       <span class="glyphicon glyphicon-trash"></span> Delete
+                                                    href="inactivestd.php?action=delete&id=' . $r['id'] . '" 
+                                                    class="btn btn-danger btn-xs" 
+                                                    style="border-radius:3px;" 
+                                                    title="Delete Permanently">
+                                                    <span class="glyphicon glyphicon-trash"></span> Delete
                                                     </a>
                                                 </div>
                                                 </td>
