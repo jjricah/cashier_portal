@@ -171,7 +171,17 @@ if ($_GET['type'] == "feesearch") {
 
 
 if ($_GET['type'] == "report") {
-	$aColumns = array('s.id', 's.sname', 's.balance', 's.fees', 'b.grade', 's.contact');
+	$aColumns = array(
+		's.id',
+		's.sname',
+		'b.strand',
+		'b.grade',
+		'b.section',
+		'b.semester',
+		's.fees',
+		's.balance',
+		's.contact'
+	);
 
 	/* Indexed column (used for fast and accurate table cardinality) */
 	$sIndexColumn = "s.id";
@@ -304,9 +314,11 @@ if ($_GET['type'] == "report") {
 
 		$row = array(
 			html_entity_decode($aRow['sname'] . '<br/>' . $aRow['contact']),
+			$aRow['strand'],
+			$aRow['grade'] . ' - ' . $aRow['section'],
+			$aRow['semester'],
 			$aRow['fees'],
 			$aRow['balance'],
-			$aRow['grade'],
 			html_entity_decode('<button class="btn btn-success btn-sm" style="border-radius:0%" onclick="javascript:GetFeeForm(' . $aRow['id'] . ')"> Check Report </button>')
 		);
 

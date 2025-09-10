@@ -191,9 +191,11 @@ include("php/header.php");
             <thead>
               <tr>
                 <th>Name/Contact</th>
+                <th>Strand/Course</th>
+                <th>Grade & Section</th>
+                <th>Semester</th>
                 <th>Fees</th>
                 <th>Balance</th>
-                <th>Grade</th>
                 <th>Action</th>
               </tr>
             </thead>
