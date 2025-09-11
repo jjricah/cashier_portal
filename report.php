@@ -124,8 +124,7 @@ include("php/header.php");
 
         // DataTable initialization function
         function mydatatable() {
-          $("#subjectresult").html('<table class="table table-striped table-bordered table-hover" id="tSortable22"><thead><tr><th>Name/Contact</th><th>Fees</th><th>Balance</th><th>Grade</th><th>Action</th></tr></thead><tbody></tbody></table>');
-
+          $("#subjectresult").html('<table class="table table-striped table-bordered table-hover" id="tSortable22"><thead><tr><th>Name/Contact</th><th>Strand/Course</th><th>Grade & Section</th><th>Semester</th><th>Fees</th><th>Balance</th><th>Action</th></tr></thead><tbody></tbody></table>');
           $("#tSortable22").dataTable({
             'sPaginationType': 'full_numbers',
             "bLengthChange": false,
