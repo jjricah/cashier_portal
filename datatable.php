@@ -156,15 +156,6 @@ if ($_GET['type'] == "feesearch") {
 
 	$row = array();
 	while ($aRow = $rResult->fetch_assoc()) {
-		// First get the student ID and grade info
-		$student_query = "SELECT s.id, b.strand, b.section, b.semester 
-                  FROM student s 
-                  LEFT JOIN grade b ON s.grade = b.id 
-                  WHERE s.sname = '" . mysqli_real_escape_string($conn, $aRow['sname']) . "' 
-                  AND s.delete_status = '0' LIMIT 1";
-		$student_result = $conn->query($student_query);
-		$student_data = $student_result->fetch_assoc();
-
 		$row = array(
 			html_entity_decode($aRow['sname'] . '<br/>' . $aRow['contact']), // Column 1
 			$student_data['strand'],                                         // Column 2  
