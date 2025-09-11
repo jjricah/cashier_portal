@@ -68,7 +68,7 @@ if ($_GET['type'] == "feesearch") {
 		$doj = $months[$month] . '-' . $year;
 		$condArr[] = " DATE_FORMAT(s.joindate, '%m-%Y') = '" . $doj . "'";
 	}
-
+	
 	if (count($condArr) > 0) {
 		$cond = " and ( " . implode(" and ", $condArr) . " )";
 	}
