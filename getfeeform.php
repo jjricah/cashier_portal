@@ -1,29 +1,27 @@
 <?php
 include("php/dbconnect.php");
 
-if(isset($_POST['req']) && $_POST['req']=='1') 
-{
+if (isset($_POST['req']) && $_POST['req'] == '1') {
 
-$sid = (isset($_POST['student']))?mysqli_real_escape_string($conn,$_POST['student']):'';
+  $sid = (isset($_POST['student'])) ? mysqli_real_escape_string($conn, $_POST['student']) : '';
 
- $sql = "select s.id,s.sname,s.balance,s.fees,s.contact,b.grade,s.joindate from student as s,grade as b where b.id=s.grade and  s.delete_status='0' and s.id='".$sid."'";
-$q = $conn->query($sql);
-if($q->num_rows>0)
-{
+  $sql = "select s.id,s.sname,s.balance,s.fees,s.contact,b.grade,s.joindate from student as s,grade as b where b.id=s.grade and  s.delete_status='0' and s.id='" . $sid . "'";
+  $q = $conn->query($sql);
+  if ($q->num_rows > 0) {
 
-$res = $q->fetch_assoc();
-echo '  <form class="form-horizontal" id ="signupForm1" action="fees.php" method="post">
+    $res = $q->fetch_assoc();
+    echo '  <form class="form-horizontal" id ="signupForm1" action="fees.php" method="post">
   <div class="form-group">
     <label class="control-label col-sm-2" for="email">Name:</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" disabled  value="'.$res['sname'].'" >
+      <input type="text" class="form-control" disabled  value="' . $res['sname'] . '" >
     </div>
   </div>
   
   <div class="form-group">
     <label class="control-label col-sm-2" for="email">Contact:</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" disabled  value="'.$res['contact'].'" />
+      <input type="text" class="form-control" disabled  value="' . $res['contact'] . '" />
     </div>
   </div>
   
@@ -31,7 +29,7 @@ echo '  <form class="form-horizontal" id ="signupForm1" action="fees.php" method
   <div class="form-group">
     <label class="control-label col-sm-2" for="email">Total Fee:</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" name="totalfee" id="totalfee"   value="'.$res['fees'].'" disabled />
+      <input type="text" class="form-control" name="totalfee" id="totalfee"   value="' . $res['fees'] . '" disabled />
     </div>
   </div>
   
@@ -39,8 +37,8 @@ echo '  <form class="form-horizontal" id ="signupForm1" action="fees.php" method
   <div class="form-group">
     <label class="control-label col-sm-2" for="email">Balance:</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" name="balance"  id="balance" value="'.$res['balance'].'" disabled />
-	  <input type="hidden" value="'.$res['id'].'" name="sid">
+      <input type="text" class="form-control" name="balance"  id="balance" value="' . $res['balance'] . '" disabled />
+	  <input type="hidden" value="' . $res['id'] . '" name="sid">
     </div>
   </div>
   
@@ -99,7 +97,7 @@ $( "#signupForm1" ).validate( {
 					paid: {
 						required: true,
 						digits: true,
-						max:'.$res['balance'].'
+						max:' . $res['balance'] . '
 					}	
 					
 					
@@ -149,43 +147,40 @@ $( "#signupForm1" ).validate( {
 </script>
 ';
 
-}else
-{
-echo "Something Goes Wrong! Try After sometime.";
-}
+  } else {
+    echo "Something Goes Wrong! Try After sometime.";
+  }
 
 
 }
 
-if(isset($_POST['req']) && $_POST['req']=='2') 
-{
+if (isset($_POST['req']) && $_POST['req'] == '2') {
 
-$sid = (isset($_POST['student']))?mysqli_real_escape_string($conn,$_POST['student']):'';
-$sql = "select paid,submitdate,transcation_remark from fees_transaction  where stdid='".$sid."'";
-$fq = $conn->query($sql);
-if($fq->num_rows>0)
-{
+  $sid = (isset($_POST['student'])) ? mysqli_real_escape_string($conn, $_POST['student']) : '';
+  $sql = "select paid,submitdate,transcation_remark from fees_transaction  where stdid='" . $sid . "'";
+  $fq = $conn->query($sql);
+  if ($fq->num_rows > 0) {
 
 
- $sql = "select s.id,s.sname,s.balance,s.fees,s.contact,b.grade,s.joindate from student as s,grade as b where b.id=s.grade  and s.id='".$sid."'";
-$sq = $conn->query($sql);
-$sr = $sq->fetch_assoc();
+    $sql = "select s.id,s.sname,s.balance,s.fees,s.contact,b.grade,s.joindate from student as s,grade as b where b.id=s.grade  and s.id='" . $sid . "'";
+    $sq = $conn->query($sql);
+    $sr = $sq->fetch_assoc();
 
-echo '
+    echo '
 <h4>Student Info</h4>
 <div class="table-responsive">
 <table class="table table-bordered">
 <tr>
 <th>Full Name</th>
-<td>'.$sr['sname'].'</td>
+<td>' . $sr['sname'] . '</td>
 <th>Grade</th>
-<td>'.$sr['grade'].'</td>
+<td>' . $sr['grade'] . '</td>
 </tr>
 <tr>
 <th>Contact</th>
-<td>'.$sr['contact'].'</td>
+<td>' . $sr['contact'] . '</td>
 <th>Joined On</th>
-<td>'.date("d-m-Y", strtotime($sr['joindate'])).'</td>
+<td>' . date("d-m-Y", strtotime($sr['joindate'])) . '</td>
 </tr>
 
 
@@ -194,7 +189,7 @@ echo '
 ';
 
 
-echo '
+    echo '
 <h4>Fee Info</h4>
 <div class="table-responsive">
 <table class="table table-bordered">
@@ -206,18 +201,17 @@ echo '
       </tr>
     </thead>
     <tbody>';
-	$totapaid = 0;
-while($res = $fq->fetch_assoc())
-{
-$totapaid+=$res['paid'];
-        echo '<tr>
-        <td>'.date("d-m-Y", strtotime($res['submitdate'])).'</td>
-        <td>'.$res['paid'].'</td>
-        <td>'.$res['transcation_remark'].'</td>
-      </tr>' ;
-}
-      
-echo '	  
+    $totapaid = 0;
+    while ($res = $fq->fetch_assoc()) {
+      $totapaid += $res['paid'];
+      echo '<tr>
+        <td>' . date("d-m-Y", strtotime($res['submitdate'])) . '</td>
+        <td>' . $res['paid'] . '</td>
+        <td>' . $res['transcation_remark'] . '</td>
+      </tr>';
+    }
+
+    echo '	  
     </tbody>
   </table>
  </div> 
@@ -226,38 +220,113 @@ echo '
 <tr>
 <th>Total Fees: 
 </th>
-<td>'.'Rs. '.$sr['fees'].'
+<td>' . 'Rs. ' . $sr['fees'] . '
 </td>
 </tr>
 
 <tr>
 <th>Total Paid: 
 </th>
-<td>'.'Rs. '.$totapaid.'
+<td>' . 'Rs. ' . $totapaid . '
 </td>
 </tr>
 
 <tr>
 <th>Balance: 
 </th>
-<td>'.'Rs. '.$sr['balance'].'
+<td>' . 'Rs. ' . $sr['balance'] . '
 </td>
 </tr>
 </table>
  ';
 
 
- }
-else
-{
-echo 'No fees submit.';
+  } else {
+    echo 'No fees submit.';
+  }
+
 }
- 
+
+// NEW: Receipt generation (req = 3)
+if (isset($_POST['req']) && $_POST['req'] == '3') {
+  $sid = (isset($_POST['student'])) ? mysqli_real_escape_string($conn, $_POST['student']) : '';
+
+  $sql = "select s.id,s.sname,s.balance,s.fees,s.contact,b.grade,b.section,b.semester,s.joindate from student as s,grade as b where b.id=s.grade and s.delete_status='0' and s.id='" . $sid . "'";
+  $q = $conn->query($sql);
+
+  if ($q->num_rows > 0) {
+    $res = $q->fetch_assoc();
+    $current_date = date('Y-m-d');
+
+    echo '
+        <div class="receipt-container">
+            <div class="receipt-header">
+                <div class="school-logo">
+                    <!-- You can replace this with actual logo -->
+                    <img src="images/logo.png" alt="Logo" style="width:50px;height:50px;" onerror="this.style.display=\'none\'">
+                </div>
+                <div class="school-name">Movers Institute of Technology and Education</div>
+                <div class="reminder-title">PAYMENT RECEIPT</div>
+            </div>
+            
+            <form id="receiptForm">
+                <div class="receipt-info">
+                    <label>Name:</label> <span>' . $res['sname'] . '</span><br>
+                    <label>Grade Level:</label> <span>' . $res['grade'] . ' - ' . $res['section'] . '</span><br>
+                    <label>Contact:</label> <span>' . $res['contact'] . '</span><br>
+                    <label>Semester:</label> <span>' . $res['semester'] . '</span><br>
+                    <label>Total Fees:</label> <span>₱ ' . number_format($res['fees'], 2) . '</span><br>
+                    <label>Balance:</label> <span style="color: red; font-weight: bold;">₱ ' . number_format($res['balance'], 2) . '</span>
+                </div>
+                
+                <div class="receipt-message">
+                    This is a reminder regarding your tuition fee based on our records. 
+                    The amount of <strong>₱ ' . number_format($res['balance'], 2) . '</strong> 
+                    is still due and must be paid <span class="deadline-text">before the deadline</span>. 
+                    Please disregard this notice if you have already settled the said amount.
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <strong>Payment Due Date:</strong>
+                    <input type="date" id="paymentDate" name="paymentDate" value="' . $current_date . '" 
+                           style="margin-left: 10px; padding: 5px; border: 1px solid #ccc;">
+                </div>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <strong>Present your registration form upon payment.</strong>
+                </div>
+                
+                <div class="receipt-footer">
+                    <div class="registrar-name">Aira S Magbanua</div>
+                    <div>Registrar</div>
+                </div>
+            </form>
+        </div>
+        
+        <script>
+        $(document).ready(function() {
+            // Set minimum date to today
+            var today = new Date().toISOString().split("T")[0];
+            $("#paymentDate").attr("min", today);
+            
+            // Update deadline text when date changes
+            $("#paymentDate").change(function() {
+                var selectedDate = new Date($(this).val());
+                var options = { year: "numeric", month: "long", day: "numeric" };
+                var formattedDate = selectedDate.toLocaleDateString("en-US", options);
+                $(".deadline-text").text("before " + formattedDate);
+            });
+        });
+        </script>
+        ';
+  } else {
+    echo "Student not found!";
+  }
 }
-		
-		 
-			
-			
-	
+
+
+
+
+
 
 ?>

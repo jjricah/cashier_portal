@@ -68,7 +68,7 @@ if ($_GET['type'] == "feesearch") {
 		$doj = $months[$month] . '-' . $year;
 		$condArr[] = " DATE_FORMAT(s.joindate, '%m-%Y') = '" . $doj . "'";
 	}
-	
+
 	if (count($condArr) > 0) {
 		$cond = " and ( " . implode(" and ", $condArr) . " )";
 	}
@@ -289,6 +289,9 @@ if ($_GET['type'] == "report") {
 	$row = array();
 	while ($aRow = $rResult->fetch_assoc()) {
 
+		// Updated action buttons with Receipt option
+		$actionButtons = '<button class="btn btn-success btn-sm" style="border-radius:0%; margin-right: 5px;" onclick="javascript:GetFeeForm(' . $aRow['id'] . ')"> Check Report </button>';
+		$actionButtons .= '<button class="btn btn-primary btn-sm" style="border-radius:0%;" onclick="javascript:GetReceipt(' . $aRow['id'] . ')"><i class="fa fa-file-text-o"></i> Receipt </button>';
 
 		$row = array(
 			html_entity_decode($aRow['sname'] . '<br/>' . $aRow['contact']),
@@ -297,7 +300,7 @@ if ($_GET['type'] == "report") {
 			$aRow['semester'],
 			$aRow['fees'],
 			$aRow['balance'],
-			html_entity_decode('<button class="btn btn-success btn-sm" style="border-radius:0%" onclick="javascript:GetFeeForm(' . $aRow['id'] . ')"> Check Report </button>')
+			html_entity_decode($actionButtons)
 		);
 
 		$output['aaData'][] = $row;
