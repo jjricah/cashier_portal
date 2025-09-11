@@ -6,18 +6,20 @@ include("php/checklogin.php");
 if ($_GET['type'] == "feesearch") {
 	$aColumns = array(
 		's.sname',
+		'b.strand',
+		'b.grade',
+		'b.section',
+		'b.semester',
 		's.fees',
 		's.balance',
-		'b.grade',
-		's.contact'
+		's.contact',
+		's.id'
 	);
 	/* Indexed column (used for fast and accurate table cardinality) */
 	$sIndexColumn = "s.id";
 
 	/* DB table to use */
-	$sTable = " student as s,grade as b ";
-
-
+	$sTable = " student as s, grade as b ";
 
 	/* 
 	 * Paging
@@ -27,7 +29,6 @@ if ($_GET['type'] == "feesearch") {
 		$sLimit = "LIMIT " . mysqli_real_escape_string($conn, $_GET['iDisplayStart']) . ", " .
 			mysqli_real_escape_string($conn, $_GET['iDisplayLength']);
 	}
-
 
 	/*
 	 * Ordering
@@ -52,14 +53,11 @@ if ($_GET['type'] == "feesearch") {
 	$condArr = array();
 	if (isset($_GET['student']) && $_GET['student'] != "") {
 		$condArr[] = "s.sname like '%" . mysqli_real_escape_string($conn, $_GET['student']) . "%'";
-
 	}
 
 	if (isset($_GET['grade']) && $_GET['grade'] != "") {
 		$condArr[] = "b.id = '" . mysqli_real_escape_string($conn, $_GET['grade']) . "'";
-
 	}
-
 
 	if (isset($_GET['doj']) && $_GET['doj'] != "") {
 		$Adate = explode(' ', $_GET['doj']);
@@ -69,8 +67,8 @@ if ($_GET['type'] == "feesearch") {
 
 		$doj = $months[$month] . '-' . $year;
 		$condArr[] = " DATE_FORMAT(s.joindate, '%m-%Y') = '" . $doj . "'";
-
 	}
+
 	if (count($condArr) > 0) {
 		$cond = " and ( " . implode(" and ", $condArr) . " )";
 	}
@@ -79,33 +77,13 @@ if ($_GET['type'] == "feesearch") {
 
 	$sWhere = " WHERE b.id=s.grade and s.delete_status='0' and s.balance>0 ";
 	if (isset($_GET['sSearch']) && $_GET['sSearch'] != "") {
-
 		$sWhere = $sWhere . " and (";
 		for ($i = 0; $i < $mycount; $i++) {
-
 			$sWhere .= $aColumns[$i] . " LIKE '%" . mysqli_real_escape_string($conn, $_GET['sSearch']) . "%' OR ";
 		}
 		$sWhere = substr_replace($sWhere, "", -3);
 		$sWhere .= ')';
 	}
-
-	/* Individual column filtering 
-	for ( $i=0 ; $i<count($aColumns) ; $i++ )
-	{
-		if ( $_GET['bSearchable_'.$i] == "true" && $_GET['sSearch_'.$i] != '' )
-		{
-			if ( $sWhere == "" )
-			{
-				$sWhere = "WHERE ";
-			}
-			else
-			{
-				$sWhere .= " AND ";
-			}
-			$sWhere .= $aColumns[$i]." LIKE '%".mysqli_real_escape_string($conn,$_GET['sSearch_'.$i])."%' ";
-		}
-	}*/
-
 
 	/*
 	 * SQL queries
@@ -132,11 +110,9 @@ if ($_GET['type'] == "feesearch") {
 	$aResultTotal = $rResultTotal->fetch_assoc();
 	$iTotal = $aResultTotal['cc'];
 
-
 	/*
 	 * Output
 	 */
-
 	if (isset($_GET['sEcho'])) {
 		$output = array(
 			"sEcho" => intval($_GET['sEcho']),
@@ -146,31 +122,28 @@ if ($_GET['type'] == "feesearch") {
 		);
 	} else {
 		$output = array(
-
 			"iTotalRecords" => $iTotal,
 			"iTotalDisplayRecords" => $iFilteredTotal,
 			"aaData" => array()
 		);
-
 	}
 
 	$row = array();
 	while ($aRow = $rResult->fetch_assoc()) {
 		$row = array(
-			html_entity_decode($aRow['sname'] . '<br/>' . $aRow['contact']), // Column 1
-			$student_data['strand'],                                         // Column 2  
-			$aRow['grade'],                                                 // Column 3
-			$student_data['semester'],                                      // Column 4
-			$aRow['fees'],                                                 // Column 5
-			$aRow['balance'],                                              // Column 6
-			html_entity_decode('<button class="btn btn-success btn-sm" style="border-radius:0%" onclick="javascript:GetFeeForm(' . $student_data['id'] . ')"><i class="fa fa-money"></i> Collect Fee </button>')  // Column 7
+			html_entity_decode($aRow['sname'] . '<br/>' . $aRow['contact']), // Column 1 - Name/Contact
+			$aRow['strand'],                                                 // Column 2 - Strand/Course
+			$aRow['grade'] . ' - ' . $aRow['section'],                      // Column 3 - Grade & Section
+			$aRow['semester'],                                              // Column 4 - Semester
+			$aRow['fees'],                                                  // Column 5 - Fees
+			$aRow['balance'],                                               // Column 6 - Balance
+			html_entity_decode('<button class="btn btn-success btn-sm" style="border-radius:0%" onclick="javascript:GetFeeForm(' . $aRow['id'] . ')"><i class="fa fa-money"></i> Collect Fee </button>')  // Column 7 - Actions
 		);
 
 		$output['aaData'][] = $row;
 	}
 
 	echo json_encode($output);
-
 }
 
 

@@ -63,9 +63,6 @@ if (isset($_REQUEST['act']) && @$_REQUEST['act'] == "1") {
   <script type="text/javascript" src="js/validation/jquery.validate.min.js"></script>
 
   <script src="js/dataTable/jquery.dataTables.min.js"></script>
-
-
-
 </head>
 <?php
 include("php/header.php");
@@ -74,20 +71,13 @@ include("php/header.php");
   <div id="page-inner">
     <div class="row">
       <div class="col-md-12">
-        <h1 class="page-head-line">Fees
-
-        </h1>
-
+        <h1 class="page-head-line">Fees</h1>
       </div>
     </div>
-
-
 
     <?php
     echo $errormsg;
     ?>
-
-
 
     <div class="row" style="margin-bottom:20px;">
       <div class="col-md-12">
@@ -95,12 +85,12 @@ include("php/header.php");
           <legend class="scheduler-border">Search:</legend>
           <form class="form-inline" role="form" id="searchform">
             <div class="form-group">
-              <label for="email">Name</label>
+              <label for="student">Name</label>
               <input type="text" class="form-control" id="student" name="student">
             </div>
 
             <div class="form-group">
-              <label for="email"> Grade </label>
+              <label for="grade"> Grade </label>
               <select class="form-control" id="grade" name="grade">
                 <option value="">Select Grade</option>
                 <?php
@@ -117,52 +107,98 @@ include("php/header.php");
             <button type="reset" class="btn btn-danger btn-sm" style="border-radius:0%" id="clear">Reset</button>
           </form>
         </fieldset>
-
       </div>
     </div>
 
     <script type="text/javascript">
-      $(document).ready(function () {
-        // ...existing autocomplete code...
+      var dataTable; // Global variable for DataTable instance
 
-        $('#find').click(function () {
-          mydatatable();
+      $(document).ready(function () {
+        // Student name autocomplete
+        $('#student').autocomplete({
+          source: function (request, response) {
+            $.ajax({
+              url: 'ajx.php',
+              dataType: "json",
+              data: {
+                name_startsWith: request.term,
+                type: 'feesearch'
+              },
+              success: function (data) {
+                response($.map(data, function (item) {
+                  return {
+                    label: item,
+                    value: item
+                  }
+                }));
+              }
+            });
+          }
         });
 
+        // Initialize DataTable once
+        initializeDataTable();
+
+        // Filter button click handler
+        $('#find').click(function () {
+          filterData();
+        });
+
+        // Clear button click handler
         $('#clear').click(function () {
           $('#searchform')[0].reset();
-          mydatatable();
+          filterData();
         });
 
-        function mydatatable() {
-          $("#subjectresult").html('<table class="table table-striped table-bordered table-hover" id="tSortable22"><thead><tr><th>Name/Contact</th><th>Strand/Course</th><th>Grade & Section</th><th>Semester</th><th>Fees</th><th>Balance</th><th>Actions</th></tr></thead><tbody></tbody></table>');
+        // Enter key handler for search form
+        $('#searchform input').keypress(function (e) {
+          if (e.which == 13) {
+            filterData();
+            return false;
+          }
+        });
 
-          $("#tSortable22").dataTable({
-            'sPaginationType': 'full_numbers',
-            "bLengthChange": false,
-            "bFilter": false,
-            "bInfo": false,
-            'bProcessing': true,
-            'bServerSide': true,
-            'sAjaxSource': "datatable.php?" + $('#searchform').serialize() + "&type=feesearch",
-            'aoColumns': [
-              { 'mData': 0 }, // Name/Contact
-              { 'mData': 1 }, // Strand/Course
-              { 'mData': 2 }, // Grade & Section
-              { 'mData': 3 }, // Semester
-              { 'mData': 4 }, // Fees
-              { 'mData': 5 }, // Balance
-              { 'mData': 6 }  // Actions
-            ],
-            'aoColumnDefs': [{
-              'bSortable': false,
-              'aTargets': [-1]
-            }]
-          });
-        }
+        $('#searchform select').change(function () {
+          filterData();
+        });
       });
 
-      // Move GetFeeForm outside document.ready
+      function initializeDataTable() {
+        dataTable = $("#tSortable22").dataTable({
+          'sPaginationType': 'full_numbers',
+          "bLengthChange": false,
+          "bFilter": false,
+          "bInfo": false,
+          'bProcessing': true,
+          'bServerSide': true,
+          'sAjaxSource': "datatable.php?type=feesearch",
+          'aoColumns': [
+            { 'mData': 0 }, // Name/Contact
+            { 'mData': 1 }, // Strand/Course
+            { 'mData': 2 }, // Grade & Section
+            { 'mData': 3 }, // Semester
+            { 'mData': 4 }, // Fees
+            { 'mData': 5 }, // Balance
+            { 'mData': 6 }  // Actions
+          ],
+          'aoColumnDefs': [{
+            'bSortable': false,
+            'aTargets': [-1]
+          }]
+        });
+      }
+
+      function filterData() {
+        // Get form data
+        var formData = $('#searchform').serialize();
+        var newAjaxSource = "datatable.php?" + formData + "&type=feesearch";
+
+        // Update the AJAX source and reload
+        dataTable.fnSettings().sAjaxSource = newAjaxSource;
+        dataTable.fnDraw();
+      }
+
+      // Fee form function
       function GetFeeForm(sid) {
         $.ajax({
           type: 'post',
@@ -181,20 +217,16 @@ include("php/header.php");
       }
     </script>
 
-
-
-
-
     <div class="panel panel-default">
       <div class="panel-heading">
         Manage Fees
       </div>
       <div class="panel-body">
-        <div class="table-sorting table-responsive">
+        <div class="table-sorting table-responsive" id="subjectresult">
           <table class="table table-striped table-bordered table-hover" id="tSortable22">
             <thead>
               <tr>
-                <th>Name | Contact</th>
+                <th>Name/Contact</th>
                 <th>Strand/Course</th>
                 <th>Grade & Section</th>
                 <th>Semester</th>
@@ -204,40 +236,12 @@ include("php/header.php");
               </tr>
             </thead>
             <tbody>
-              <?php
-              $sql = "SELECT student.*, 
-                grade.strand,
-                grade.grade as grade_level,
-                grade.section,
-                grade.semester
-            FROM student 
-            LEFT JOIN grade ON student.grade = grade.id 
-            WHERE student.delete_status='0' AND student.balance > 0
-            ORDER BY grade.strand ASC, grade.grade ASC, student.sname ASC";
-
-              $q = $conn->query($sql);
-              while ($r = $q->fetch_assoc()) {
-                echo '<tr>
-                <td>' . $r['sname'] . '<br/>' . $r['contact'] . '</td>
-                <td>' . $r['strand'] . '</td>
-                <td>' . $r['grade_level'] . ' - ' . $r['section'] . '</td>
-                <td>' . $r['semester'] . '</td>
-                <td>' . $r['fees'] . '</td>
-                <td>' . $r['balance'] . '</td>
-                <td>' .
-                  html_entity_decode('<button class="btn btn-success btn-sm" style="border-radius:0%" onclick="javascript:GetFeeForm(' . $r['id'] . ')"><i class="fa fa-money"></i> Collect Fee </button>') .
-                  '</td>
-            </tr>';
-              }
-              ?>
+              <!-- Data will be loaded via AJAX -->
             </tbody>
           </table>
         </div>
       </div>
     </div>
-
-
-    <!-------->
 
     <!-- Modal -->
     <div class="modal fade" id="myModal" role="dialog">
@@ -248,16 +252,10 @@ include("php/header.php");
             <h4 class="modal-title">Collect Fee</h4>
           </div>
           <div class="modal-body" id="formcontent">
-
           </div>
-
         </div>
       </div>
     </div>
-
-
-    <!--------->
-
 
   </div>
   <!-- /. PAGE INNER  -->
@@ -266,14 +264,12 @@ include("php/header.php");
 </div>
 <!-- /. WRAPPER  -->
 
-
 <!-- BOOTSTRAP SCRIPTS -->
 <script src="js/bootstrap.js"></script>
 <!-- METISMENU SCRIPTS -->
 <script src="js/jquery.metisMenu.js"></script>
 <!-- CUSTOM SCRIPTS -->
 <script src="js/custom1.js"></script>
-
 
 </body>
 

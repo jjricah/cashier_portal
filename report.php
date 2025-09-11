@@ -32,10 +32,8 @@ include("php/checklogin.php");
   <script type="text/javascript" src="js/validation/jquery.validate.min.js"></script>
 
   <script src="js/dataTable/jquery.dataTables.min.js"></script>
-
-
-
 </head>
+
 <?php
 include("php/header.php");
 ?>
@@ -43,17 +41,9 @@ include("php/header.php");
   <div id="page-inner">
     <div class="row">
       <div class="col-md-12">
-        <h1 class="page-head-line">View Reports
-
-        </h1>
-
+        <h1 class="page-head-line">View Reports</h1>
       </div>
     </div>
-
-
-
-
-
 
     <div class="row" style="margin-bottom:20px;">
       <div class="col-md-12">
@@ -61,19 +51,19 @@ include("php/header.php");
           <legend class="scheduler-border">Search:</legend>
           <form class="form-inline" role="form" id="searchform">
             <div class="form-group">
-              <label for="email">Name</label>
+              <label for="student">Name</label>
               <input type="text" class="form-control" id="student" name="student">
             </div>
 
             <div class="form-group">
-              <label for="email">Grade</label>
+              <label for="grade">Grade</label>
               <select class="form-control" id="grade" name="grade">
                 <option value="">Select Grade</option>
                 <?php
                 $sql = "select * from grade where delete_status='0' order by grade.grade asc";
                 $q = $conn->query($sql);
                 while ($r = $q->fetch_assoc()) {
-                  echo '<option value="' . $r['id'] . '"  ' . (($grade == $r['id']) ? 'selected="selected"' : '') . '>' . $r['grade'] . '</option>';
+                  echo '<option value="' . $r['id'] . '">' . $r['grade'] . '</option>';
                 }
                 ?>
               </select>
@@ -83,11 +73,12 @@ include("php/header.php");
             <button type="reset" class="btn btn-danger btn-sm" style="border-radius:0%" id="clear">Reset</button>
           </form>
         </fieldset>
-
       </div>
     </div>
 
     <script type="text/javascript">
+      var dataTable; // Global variable for DataTable instance
+
       $(document).ready(function () {
         // Student name autocomplete
         $('#student').autocomplete({
@@ -111,37 +102,36 @@ include("php/header.php");
           }
         });
 
+        // Initialize DataTable once
+        initializeDataTable();
+
         // Filter button click handler
         $('#find').click(function () {
-          mydatatable();
+          filterData();
         });
 
         // Clear button click handler
         $('#clear').click(function () {
           $('#searchform')[0].reset();
-          mydatatable();
+          filterData();
         });
 
-        // DataTable initialization function
-        function mydatatable() {
-          $("#subjectresult").html('<table class="table table-striped table-bordered table-hover" id="tSortable22"><thead><tr><th>Name/Contact</th><th>Strand/Course</th><th>Grade & Section</th><th>Semester</th><th>Fees</th><th>Balance</th><th>Action</th></tr></thead><tbody></tbody></table>');
-          $("#tSortable22").dataTable({
-            'sPaginationType': 'full_numbers',
-            "bLengthChange": false,
-            "bFilter": false,
-            "bInfo": false,
-            'bProcessing': true,
-            'bServerSide': true,
-            'sAjaxSource': "datatable.php?" + $('#searchform').serialize() + "&type=report",
-            'aoColumnDefs': [{
-              'bSortable': false,
-              'aTargets': [-1]
-            }]
-          });
-        }
+        // Enter key handler for search form
+        $('#searchform input').keypress(function (e) {
+          if (e.which == 13) {
+            filterData();
+            return false;
+          }
+        });
 
-        // Initial DataTable setup
-        $("#tSortable22").dataTable({
+        // Auto-filter when dropdown changes
+        $('#searchform select').change(function () {
+          filterData();
+        });
+      });
+
+      function initializeDataTable() {
+        dataTable = $("#tSortable22").dataTable({
           'sPaginationType': 'full_numbers',
           "bLengthChange": false,
           "bFilter": false,
@@ -149,12 +139,31 @@ include("php/header.php");
           'bProcessing': true,
           'bServerSide': true,
           'sAjaxSource': "datatable.php?type=report",
+          'aoColumns': [
+            { 'mData': 0 }, // Name/Contact
+            { 'mData': 1 }, // Strand/Course
+            { 'mData': 2 }, // Grade & Section
+            { 'mData': 3 }, // Semester
+            { 'mData': 4 }, // Fees
+            { 'mData': 5 }, // Balance
+            { 'mData': 6 }  // Actions
+          ],
           'aoColumnDefs': [{
             'bSortable': false,
             'aTargets': [-1]
           }]
         });
-      });
+      }
+
+      function filterData() {
+        // Get form data
+        var formData = $('#searchform').serialize();
+        var newAjaxSource = "datatable.php?" + formData + "&type=report";
+
+        // Update the AJAX source and reload
+        dataTable.fnSettings().sAjaxSource = newAjaxSource;
+        dataTable.fnDraw();
+      }
 
       // Fee form function
       function GetFeeForm(sid) {
@@ -175,14 +184,9 @@ include("php/header.php");
       }
     </script>
 
-
-
-
-
-
     <div class="panel panel-default">
       <div class="panel-heading">
-        Manage Fees
+        Manage Reports
       </div>
       <div class="panel-body">
         <div class="table-sorting table-responsive" id="subjectresult">
@@ -199,14 +203,12 @@ include("php/header.php");
               </tr>
             </thead>
             <tbody>
+              <!-- Data will be loaded via AJAX -->
             </tbody>
           </table>
         </div>
       </div>
     </div>
-
-
-    <!-------->
 
     <!-- Modal -->
     <div class="modal fade" id="myModal" role="dialog">
@@ -217,7 +219,6 @@ include("php/header.php");
             <h4 class="modal-title">Fee Report</h4>
           </div>
           <div class="modal-body" id="formcontent">
-
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" style="border-radius:0%" data-dismiss="modal">Close</button>
@@ -226,10 +227,6 @@ include("php/header.php");
       </div>
     </div>
 
-
-    <!--------->
-
-
   </div>
   <!-- /. PAGE INNER  -->
 </div>
@@ -237,14 +234,12 @@ include("php/header.php");
 </div>
 <!-- /. WRAPPER  -->
 
-
 <!-- BOOTSTRAP SCRIPTS -->
 <script src="js/bootstrap.js"></script>
 <!-- METISMENU SCRIPTS -->
 <script src="js/jquery.metisMenu.js"></script>
 <!-- CUSTOM SCRIPTS -->
 <script src="js/custom1.js"></script>
-
 
 </body>
 
